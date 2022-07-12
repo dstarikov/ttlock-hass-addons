@@ -155,9 +155,8 @@ class HomeAssistant {
           this.discovery_prefix + "/number/" + id + "/autolock/config";
         const autoLockPayload = {
           unique_id: "ttlock_" + id + "_autolock",
-          name: name + " AutoLock",
+          name: name + " AutoLock Time",
           device: device,
-          device_class: "duration",
           unit_of_measurement: "s",
           icon: "mdi:clock",
           state_topic: "ttlock/" + id,
@@ -232,11 +231,11 @@ class HomeAssistant {
           lockedStatus == LockedStatus.LOCKED ? "LOCK" : "UNLOCK";
       }
 
-      if (lock.hasAudio) {
+      if (lock.hasLockSound()) {
         statePayload.audio = (await lock.getLockSound()) == AudioManage.TURN_ON ? true : false;
       }
 
-      if (lock.hasAutoLock) {
+      if (lock.hasAutoLock()) {
         statePayload.autolock = await lock.getAutolockTime();
       }
 
@@ -322,7 +321,9 @@ class HomeAssistant {
       }
       let result = false;
       const command_arr = command.split(" ");
-      while (!result) {
+      let tries = 0;
+      while (!result && tries < 10) {
+        tries += 1;
         switch (command_arr[0]) {
           case "LOCK":
             result = await manager.lockLock(address);
@@ -333,7 +334,7 @@ class HomeAssistant {
           case "AUTOLOCK":
             if (command_arr[1] !== undefined) {
               const duration = parseInt(command.split(" ")[1]);
-              result = await manager.setAudio(address, duration);
+              result = await manager.setAutoLock(address, duration);
             } else {
               result = true;
             }
