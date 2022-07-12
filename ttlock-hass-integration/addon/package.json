@@ -10,7 +10,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/z-jack/ttlock-hass-addons.git"
+    "url": "git+https://github.com/dstarikov/ttlock-hass-addons.git"
   },
   "keywords": [
     "ttlock",
@@ -25,9 +25,9 @@
   "author": "JackZ <404@jackz.cn>",
   "license": "GPL-3.0",
   "bugs": {
-    "url": "https://github.com/z-jack/ttlock-hass-addons/issues"
+    "url": "https://github.com/dstarikov/ttlock-hass-addons/issues"
   },
-  "homepage": "https://github.com/z-jack/ttlock-hass-addons/tree/master/ttlock-hass-integration",
+  "homepage": "https://github.com/dstarikov/ttlock-hass-addons/tree/master/ttlock-hass-integration",
   "dependencies": {
     "async-mqtt": "^2.6.1",
     "express": "^4.17.1",

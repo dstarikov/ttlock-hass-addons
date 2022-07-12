@@ -10,5 +10,5 @@
 
 Please see [ttlock-hass-integration/README.md](./ttlock-hass-integration/README.md) for more information.  
 
-To install add [https://github.com/z-jack/ttlock-hass-addons](https://github.com/z-jack/ttlock-hass-addons) to your **Supervisor** -> **Add-on Store** -> **Repositories**.  
+To install add [https://github.com/dstarikov/ttlock-hass-addons](https://github.com/dstarikov/ttlock-hass-addons) to your **Supervisor** -> **Add-on Store** -> **Repositories**.  
 

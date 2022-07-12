@@ -131,8 +131,8 @@ class HomeAssistant {
         unique_id: "ttlock_" + id + "_rssi",
         name: name + " RSSI",
         device: device,
+        device_class: "signal_strength",
         unit_of_measurement: "dB",
-        icon: "mdi:signal",
         state_topic: "ttlock/" + id,
         value_template: "{{ value_json.rssi }}",
       };
@@ -148,6 +148,67 @@ class HomeAssistant {
         JSON.stringify(rssiPayload),
         { retain: true }
       );
+
+      if (lock.hasAutoLock) {
+        // setup autolock control 
+        const configAutoLockTopic =
+          this.discovery_prefix + "/number/" + id + "/autolock/config";
+        const autoLockPayload = {
+          unique_id: "ttlock_" + id + "_autolock",
+          name: name + " AutoLock",
+          device: device,
+          device_class: "duration",
+          unit_of_measurement: "s",
+          icon: "mdi:clock",
+          state_topic: "ttlock/" + id,
+          value_template: "{{ value_json.autolock }}",
+          min: 0,
+          max: 60,
+          command_topic: "ttlock/" + id + "/set",
+          command_template: "AUTOLOCK {{ value }}",
+        };
+        if (process.env.MQTT_DEBUG == "1") {
+          console.log(
+            "MQTT Publish",
+            configAutoLockTopic,
+            JSON.stringify(autoLockPayload)
+          );
+        }
+        res = await this.client.publish(
+          configAutoLockTopic,
+          JSON.stringify(autoLockPayload),
+          { retain: true }
+        );
+      }
+
+      if (lock.hasAudio) {
+        // setup audio control 
+        const configAudioTopic =
+          this.discovery_prefix + "/switch/" + id + "/audio/config";
+        const audioPayload = {
+          unique_id: "ttlock_" + id + "_audio",
+          name: name + " Audio",
+          device: device,
+          icon: "mdi:speaker",
+          state_topic: "ttlock/" + id,
+          value_template: "{{ value_json.audio }}",
+          command_topic: "ttlock/" + id + "/set",
+          payload_on: "AUDIO ON",
+          payload_off: "AUDIO OFF"
+        };
+        if (process.env.MQTT_DEBUG == "1") {
+          console.log(
+            "MQTT Publish",
+            configAudioTopic,
+            JSON.stringify(audioPayload)
+          );
+        }
+        res = await this.client.publish(
+          configAudioTopic,
+          JSON.stringify(audioPayload),
+          { retain: true }
+        );
+      }
 
       this.configuredLocks.add(lock.getAddress());
     }
@@ -169,6 +230,14 @@ class HomeAssistant {
       if (lockedStatus != LockedStatus.UNKNOWN) {
         statePayload.state =
           lockedStatus == LockedStatus.LOCKED ? "LOCK" : "UNLOCK";
+      }
+
+      if (lock.hasAudio) {
+        statePayload.audio = (await lock.getLockSound()) == AudioManage.TURN_ON ? true : false;
+      }
+
+      if (lock.hasAutoLock) {
+        statePayload.autolock = await lock.getAutolockTime();
       }
 
       if (process.env.MQTT_DEBUG == "1") {
@@ -252,13 +321,33 @@ class HomeAssistant {
         console.log("MQTT command:", address, command);
       }
       let result = false;
+      const command_arr = command.split(" ");
       while (!result) {
-        switch (command) {
+        switch (command_arr[0]) {
           case "LOCK":
             result = await manager.lockLock(address);
             break;
           case "UNLOCK":
             result = await manager.unlockLock(address);
+            break;
+          case "AUTOLOCK":
+            if (command_arr[1] !== undefined) {
+              const duration = parseInt(command.split(" ")[1]);
+              result = await manager.setAudio(address, duration);
+            } else {
+              result = true;
+            }
+            break;
+          case "AUDIO":
+            if (command_arr[1] !== undefined) {
+              const audio = command_arr[1] == "ON" ? true : false;
+              result = await manager.setAudio(address, audio);
+            } else {
+              result = true;
+            }
+            break;
+          default:
+            result = true;
             break;
         }
         await sleep(1000);
