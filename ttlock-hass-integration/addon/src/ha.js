@@ -149,7 +149,7 @@ class HomeAssistant {
         { retain: true }
       );
 
-      if (lock.hasAutoLock()) {
+      if (lock.hasAutolock()) {
         // setup autolock control 
         const configAutoLockTopic =
           this.discovery_prefix + "/number/" + id + "/autolock/config";
@@ -240,7 +240,7 @@ class HomeAssistant {
       }
 
       try {
-        if (lock.hasAutoLock()) {
+        if (lock.hasAutolock()) {
           statePayload.autolock = await lock.getAutolockTime();
         }
       } catch (e) {
