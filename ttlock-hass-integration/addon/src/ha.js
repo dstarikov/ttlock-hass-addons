@@ -149,7 +149,7 @@ class HomeAssistant {
         { retain: true }
       );
 
-      if (lock.hasAutoLock) {
+      // if (lock.hasAutoLock) {
         // setup autolock control 
         const configAutoLockTopic =
           this.discovery_prefix + "/number/" + id + "/autolock/config";
@@ -179,9 +179,9 @@ class HomeAssistant {
           JSON.stringify(autoLockPayload),
           { retain: true }
         );
-      }
+      // }
 
-      if (lock.hasAudio) {
+      // if (lock.hasAudio) {
         // setup audio control 
         const configAudioTopic =
           this.discovery_prefix + "/switch/" + id + "/audio/config";
@@ -208,7 +208,7 @@ class HomeAssistant {
           JSON.stringify(audioPayload),
           { retain: true }
         );
-      }
+      // }
 
       this.configuredLocks.add(lock.getAddress());
     }
