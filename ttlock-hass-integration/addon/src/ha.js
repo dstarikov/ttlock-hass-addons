@@ -231,12 +231,20 @@ class HomeAssistant {
           lockedStatus == LockedStatus.LOCKED ? "LOCK" : "UNLOCK";
       }
 
-      if (lock.hasLockSound()) {
-        statePayload.audio = (await lock.getLockSound()) == AudioManage.TURN_ON ? true : false;
+      try {
+        if (lock.hasLockSound()) {
+          statePayload.audio = (await lock.getLockSound()) == AudioManage.TURN_ON ? true : false;
+        }
+      } catch (e) {
+        console.log("Error setting statePayload audio: ", e);
       }
 
-      if (lock.hasAutoLock()) {
-        statePayload.autolock = await lock.getAutolockTime();
+      try {
+        if (lock.hasAutoLock()) {
+          statePayload.autolock = await lock.getAutolockTime();
+        }
+      } catch (e) {
+        console.log("Error setting statePayload autolock time: ", e);
       }
 
       if (process.env.MQTT_DEBUG == "1") {
@@ -322,7 +330,7 @@ class HomeAssistant {
       let result = false;
       const command_arr = command.split(" ");
       let tries = 0;
-      while (!result && tries < 10) {
+      while (!result && tries < 5) {
         tries += 1;
         switch (command_arr[0]) {
           case "LOCK":
@@ -334,6 +342,7 @@ class HomeAssistant {
           case "AUTOLOCK":
             if (command_arr[1] !== undefined) {
               const duration = parseInt(command.split(" ")[1]);
+              console.log("autolock duration: ", duration);
               result = await manager.setAutoLock(address, duration);
             } else {
               result = true;
